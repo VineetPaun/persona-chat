@@ -364,7 +364,7 @@ export default function ChatPage() {
         markdown += `**Description:** ${persona.description}\n\n`
         markdown += `---\n\n`
 
-        messages.forEach((message, index) => {
+        messages.forEach((message) => {
             const sender = message.role === "user" ? "You" : persona.name
             const avatar = message.role === "user" ? "👤" : persona.avatar
             markdown += `## ${avatar} ${sender}\n\n`
@@ -766,7 +766,6 @@ export default function ChatPage() {
                     {speechSupported && !voiceModeEnabled && messages.length === 0 && (
                         <div className="max-w-3xl mx-auto mt-2">
                             <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                                💡 Tip: Enable Voice Mode to hear {persona.name}'s responses spoken aloud
                                 {!speechServiceAvailable && (
                                     <div className="mt-1 text-orange-500">
                                         Voice input is currently unavailable. You can still type messages normally.
