@@ -5,8 +5,8 @@ import { memoryStore } from "@/lib/memoryStore";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://integrate.api.nvidia.com/v1'
-}); 
+    baseURL: "https://integrate.api.nvidia.com/v1",
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -45,6 +45,24 @@ export async function POST(request: NextRequest) {
             persona.systemPrompt ||
             `You are role-playing as ${persona.name}. ${persona.description} Always stay in character and respond in this style.`;
 
+        // Leverage tweet examples to guide tone/style for short-form content
+        if (persona.tweetExamples && persona.tweetExamples.length > 0) {
+            const tweetSamples = persona.tweetExamples
+                .slice(0, 6)
+                .map((t, i) => `${i + 1}. ${t}`)
+                .join("\n");
+            systemPrompt += `\n\nTweet style examples (use as style reference when writing short social posts or when explicitly asked for tweets/replies/threads):\n${tweetSamples}\nGuidelines: Keep tweets concise (<=280 chars unless asked otherwise), natural tone matching the samples, minimal hashtags, and avoid generic AI phrasing.`;
+        }
+
+        // Include YouTube timestamp snippets as domain/context references
+        if (persona.youtubeTimestamps && persona.youtubeTimestamps.length > 0) {
+            const ytSnippets = persona.youtubeTimestamps
+                .slice(0, 6)
+                .map((t, i) => `${i + 1}. ${t}`)
+                .join("\n");
+            systemPrompt += `\n\nReference snippets from video transcripts (use for factual grounding or citing examples when relevant, but do not invent timestamps):\n${ytSnippets}\nIf the user asks about these topics, you can reference that this comes from prior content in your style.`;
+        }
+
         // Add memory context to system prompt
         if (conversationSummary) {
             systemPrompt += `\n\nPrevious conversation context: ${conversationSummary.summary}`;
@@ -62,6 +80,24 @@ export async function POST(request: NextRequest) {
                     memory.context
                 })`;
             });
+        }
+
+        // Tailor prompt based on user intent (tweet/thread/video) to maximize persona assets
+        const isTweetRequest =
+            /\b(tweet|thread|reply|x\.com|post on twitter|compose on twitter)\b/i.test(
+                currentMessage
+            );
+        const isVideoGrounding =
+            /\b(video|youtube|timestamp|transcript|clip|episode)\b/i.test(
+                currentMessage
+            );
+
+        if (isTweetRequest && persona.tweetExamples?.length) {
+            systemPrompt += `\n\nWhen the user asks for a tweet/thread/reply:\n- Match the voice from the tweet examples above.\n- Single tweet: keep <= 280 characters.\n- Thread: output numbered lines (1/, 2/, 3/) with each line <= 280 characters.\n- Reply: keep conversational, concise, avoid overuse of emojis/hashtags.\n- No generic AI disclaimers; keep it natural.`;
+        }
+
+        if (isVideoGrounding && persona.youtubeTimestamps?.length) {
+            systemPrompt += `\n\nWhen the user references videos/transcripts: Ground your answer in the provided transcript snippets above. Do not fabricate timestamps. If relevant, you may say this is based on your previous videos.`;
         }
 
         // Prepare messages for OpenAI
@@ -83,7 +119,7 @@ export async function POST(request: NextRequest) {
 
         const completion = await openai.chat.completions.create({
             model: "openai/gpt-oss-120b",
-            messages: openaiMessages
+            messages: openaiMessages,
         });
 
         const aiMessage = completion.choices[0]?.message?.content;

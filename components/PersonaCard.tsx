@@ -53,6 +53,22 @@ export function PersonaCard({ persona, onClick, onDelete, isCustom = false }: Pe
                 ))}
               </div>
             )}
+
+            {/* Indicators for enriched training data */}
+            {(persona.tweetExamples?.length || persona.youtubeTimestamps?.length) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {persona.tweetExamples?.length ? (
+                  <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs rounded-full">
+                    {persona.tweetExamples.length} tweet samples
+                  </span>
+                ) : null}
+                {persona.youtubeTimestamps?.length ? (
+                  <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-xs rounded-full">
+                    {persona.youtubeTimestamps.length} video snippets
+                  </span>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

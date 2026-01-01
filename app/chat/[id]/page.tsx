@@ -632,10 +632,48 @@ export default function ChatPage() {
                                     Start chatting with {persona.name}
                                 </h2>
                                 <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">{persona.description}</p>
+                                {(persona.tweetExamples?.length || persona.youtubeTimestamps?.length) && (
+                                    <div className="max-w-xl mx-auto mb-4 text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                                        {persona.tweetExamples?.length ? (
+                                            <div>
+                                                <strong className="block text-emerald-700 dark:text-emerald-300 mb-1">Tweet style ready:</strong>
+                                                <span>Ask for tweets, threads, or replies to see their authentic tone.</span>
+                                            </div>
+                                        ) : null}
+                                        {persona.youtubeTimestamps?.length ? (
+                                            <div>
+                                                <strong className="block text-amber-700 dark:text-amber-300 mb-1">Video snippets loaded:</strong>
+                                                <span>Ask about topics covered in past videos for grounded answers.</span>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                )}
                                 {memoryStats.totalMemories > 0 && (
                                     <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
                                         <Brain className="h-4 w-4" />
                                         <span>I remember our previous conversations ({memoryStats.totalMemories} memories)</span>
+                                    </div>
+                                )}
+                                {(persona.tweetExamples?.length || persona.youtubeTimestamps?.length) && (
+                                    <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
+                                        {persona.tweetExamples?.length ? (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setInputValue("Write a 3-tweet thread about learning Next.js like you usually do on Twitter.")}
+                                            >
+                                                Try a Tweet Thread
+                                            </Button>
+                                        ) : null}
+                                        {persona.youtubeTimestamps?.length ? (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setInputValue("Summarize your video advice on bundlers using your transcript snippets.")}
+                                            >
+                                                Use Video Snippets
+                                            </Button>
+                                        ) : null}
                                     </div>
                                 )}
                                 {speechSupported && (

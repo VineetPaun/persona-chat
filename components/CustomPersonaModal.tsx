@@ -41,6 +41,8 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
   const [selectedEmoji, setSelectedEmoji] = useState("🤖")
   const [trainingData, setTrainingData] = useState("")
   const [uploadedFileName, setUploadedFileName] = useState("")
+  const [tweetExamples, setTweetExamples] = useState("")
+  const [youtubeTimestamps, setYoutubeTimestamps] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +88,14 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
       description: description.trim(),
       avatar: selectedEmoji,
       systemPrompt,
+      tweetExamples: tweetExamples
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      youtubeTimestamps: youtubeTimestamps
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
     }
 
     onSubmit(customPersona)
@@ -96,6 +106,8 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
     setSelectedEmoji("🤖")
     setTrainingData("")
     setUploadedFileName("")
+    setTweetExamples("")
+    setYoutubeTimestamps("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -107,6 +119,8 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
     setSelectedEmoji("🤖")
     setTrainingData("")
     setUploadedFileName("")
+    setTweetExamples("")
+    setYoutubeTimestamps("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -196,6 +210,36 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
             </div>
           </div>
 
+          <div className="space-y-3">
+            <Label htmlFor="tweet-examples">Tweet Examples (one per line, optional)</Label>
+            <Textarea
+              id="tweet-examples"
+              value={tweetExamples}
+              onChange={(e) => setTweetExamples(e.target.value)}
+              placeholder={`Short social posts that capture the persona's tone.\nExample: Learning Next.js? Start with pages, then API routes. Chai lao, code hum karwate hain.`}
+              rows={4}
+            />
+            {tweetExamples && (
+              <p className="text-xs text-muted-foreground">{tweetExamples.split("\n").filter(Boolean).length} tweets</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="youtube-timestamps">YouTube Transcript Snippets (one per line, optional)</Label>
+            <Textarea
+              id="youtube-timestamps"
+              value={youtubeTimestamps}
+              onChange={(e) => setYoutubeTimestamps(e.target.value)}
+              placeholder={`Paste key transcript lines or notes to ground the persona's knowledge.`}
+              rows={4}
+            />
+            {youtubeTimestamps && (
+              <p className="text-xs text-muted-foreground">
+                {youtubeTimestamps.split("\n").filter(Boolean).length} snippets
+              </p>
+            )}
+          </div>
+
           <div>
             <Label>Choose Avatar</Label>
             <div className="grid grid-cols-8 gap-2 mt-2">
@@ -204,11 +248,10 @@ export function CustomPersonaModal({ isOpen, onClose, onSubmit }: CustomPersonaM
                   key={emoji}
                   type="button"
                   onClick={() => setSelectedEmoji(emoji)}
-                  className={`text-2xl p-2 rounded-lg border-2 transition-colors ${
-                    selectedEmoji === emoji
+                  className={`text-2xl p-2 rounded-lg border-2 transition-colors ${selectedEmoji === emoji
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                       : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                  }`}
+                    }`}
                 >
                   {emoji}
                 </button>
